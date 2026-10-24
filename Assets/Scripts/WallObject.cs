@@ -22,6 +22,7 @@ public class WallObject : CellObject
     public override bool PlayerWantsToEnter()
     {
         m_HealthPoint -= 1;
+        GameManager.Instance.PlaySound(GameManager.Instance.WallAttackClip);
 
         if (m_HealthPoint > 0)
         {

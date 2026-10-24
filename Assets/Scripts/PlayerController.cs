@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             m_IsMoving = true;
+            GameManager.Instance.PlaySound(GameManager.Instance.MoveClip);
             m_MoveTarget = m_Board.CellToWorld(m_CellPosition);
         }
 

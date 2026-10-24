@@ -7,6 +7,7 @@ public class FoodObject : CellObject
     public override void PlayerEntered()
     {
         Destroy(gameObject);
+        GameManager.Instance.PlaySound(GameManager.Instance.FoodPickupClip);
 
         //increase food
         GameManager.Instance.ChangeFood(AmountGranted);

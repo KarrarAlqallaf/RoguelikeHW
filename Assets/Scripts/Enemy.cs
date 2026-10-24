@@ -28,6 +28,7 @@ public class Enemy : CellObject
 
         if (m_CurrentHealth <= 0)
         {
+            GameManager.Instance.PlaySound(GameManager.Instance.EnemyDeathClip);
             Destroy(gameObject);
         }
 
@@ -72,6 +73,7 @@ public class Enemy : CellObject
             || (yDist == 0 && absXDist == 1))
         {
             //we are adjacent to the player, attack!
+            GameManager.Instance.PlaySound(GameManager.Instance.EnemyAttackClip);
             GameManager.Instance.ChangeFood(-3);
         }
         else

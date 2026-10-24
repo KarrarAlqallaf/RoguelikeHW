@@ -15,6 +15,16 @@ public class GameManager : MonoBehaviour
 
    public TurnManager TurnManager { get; private set; }
 
+   public AudioSource SfxSource;
+   public AudioClip MoveClip;
+   public AudioClip WallAttackClip;
+   public AudioClip FoodPickupClip;
+   public AudioClip EnemyAttackClip;
+   public AudioClip EnemyDeathClip;
+   public AudioClip GameOverClip;
+
+   private bool m_IsGameOver;
+
    private int m_FoodAmount = 100;
    private int m_CurrentLevel = 1;
 
@@ -45,6 +55,7 @@ public class GameManager : MonoBehaviour
    public void StartNewGame()
    {
        m_GameOverPanel.style.visibility = Visibility.Hidden;
+       m_IsGameOver = false;
 
        m_CurrentLevel = 1;
        m_FoodAmount = 100;
@@ -76,11 +87,19 @@ public class GameManager : MonoBehaviour
        m_FoodAmount += amount;
        m_FoodLabel.text = "Food : " + m_FoodAmount;
 
-       if (m_FoodAmount <= 0)
+       if (m_FoodAmount <= 0 && !m_IsGameOver)
        {
+           m_IsGameOver = true;
+           PlaySound(GameOverClip);
            PlayerController.GameOver();
            m_GameOverPanel.style.visibility = Visibility.Visible;
            m_GameOverMessage.text = "Game Over!\n\nSurvived " + m_CurrentLevel + " days\n\nPress Enter to restart";
        }
+   }
+
+   public void PlaySound(AudioClip clip)
+   {
+       if (clip != null)
+           SfxSource.PlayOneShot(clip);
    }
 }
