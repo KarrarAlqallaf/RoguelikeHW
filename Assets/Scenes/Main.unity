@@ -452,6 +452,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ec04a1f35fe27a949baa39b88163d560, type: 2}
   - {fileID: 11400000, guid: 2bf81837e6d6d5c47882c71cbed9d32b, type: 2}
   - {fileID: 11400000, guid: 6edb398d53123a245ab3a487ade88c55, type: 2}
+  WallTiles:
+  - {fileID: 11400000, guid: f3d8c121da8d668409a59b42b7963506, type: 2}
+  - {fileID: 11400000, guid: 21c6b512151ae7341a99bf9c0aca5871, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
