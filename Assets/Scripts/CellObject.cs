@@ -4,6 +4,8 @@ public class CellObject : MonoBehaviour
 {
     protected Vector2Int m_Cell;
 
+    public Vector2Int Cell => m_Cell;
+
     public virtual void Init(Vector2Int cell)
     {
         m_Cell = cell;

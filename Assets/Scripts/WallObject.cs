@@ -1,10 +1,15 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.Tilemaps;
 
 public class WallObject : CellObject
 {
-    public Tile ObstacleTile;
-    public int MaxHealth = 3;
+    [SerializeField, FormerlySerializedAs("ObstacleTile")]
+    [Tooltip("Tile shown on the cell while the wall is standing")]
+    private Tile m_ObstacleTile;
+    [SerializeField, FormerlySerializedAs("MaxHealth"), Range(1, 10)]
+    [Tooltip("Number of hits needed to destroy the wall")]
+    private int m_MaxHealth = 3;
 
     private int m_HealthPoint;
     private Tile m_OriginalTile;
@@ -13,10 +18,10 @@ public class WallObject : CellObject
     {
         base.Init(cell);
 
-        m_HealthPoint = MaxHealth;
+        m_HealthPoint = m_MaxHealth;
 
         m_OriginalTile = GameManager.Instance.BoardManager.GetCellTile(cell);
-        GameManager.Instance.BoardManager.SetCellTile(cell, ObstacleTile);
+        GameManager.Instance.BoardManager.SetCellTile(cell, m_ObstacleTile);
     }
 
     public override bool PlayerWantsToEnter()
@@ -30,7 +35,9 @@ public class WallObject : CellObject
         }
 
         GameManager.Instance.BoardManager.SetCellTile(m_Cell, m_OriginalTile);
-        Destroy(gameObject);
+        GameManager.Instance.PlayEffect(GameManager.Instance.WallDestroyEffect, transform.position);
+        //recycle the wall instead of destroying it
+        GameManager.Instance.BoardManager.RemoveObject(this);
         return true;
     }
 }

@@ -1,17 +1,24 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Enemy : CellObject
 {
-    public int Health = 3;
+    [SerializeField, FormerlySerializedAs("Health"), Range(1, 10)]
+    [Tooltip("Number of hits needed to kill the enemy")]
+    private int m_Health = 3;
+    [SerializeField, Range(1, 20)]
+    [Tooltip("Food removed from the player on each attack")]
+    private int m_AttackDamage = 3;
 
     private int m_CurrentHealth;
 
-    private void Awake()
+    //enemies are pooled, so only listen to turns while active on the board
+    private void OnEnable()
     {
         GameManager.Instance.TurnManager.OnTick += TurnHappened;
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         GameManager.Instance.TurnManager.OnTick -= TurnHappened;
     }
@@ -19,7 +26,7 @@ public class Enemy : CellObject
     public override void Init(Vector2Int coord)
     {
         base.Init(coord);
-        m_CurrentHealth = Health;
+        m_CurrentHealth = m_Health;
     }
 
     public override bool PlayerWantsToEnter()
@@ -29,7 +36,9 @@ public class Enemy : CellObject
         if (m_CurrentHealth <= 0)
         {
             GameManager.Instance.PlaySound(GameManager.Instance.EnemyDeathClip);
-            Destroy(gameObject);
+            GameManager.Instance.PlayEffect(GameManager.Instance.EnemyDeathEffect, transform.position);
+            //recycle the enemy instead of destroying it
+            GameManager.Instance.BoardManager.RemoveObject(this);
         }
 
         return false;
@@ -74,7 +83,7 @@ public class Enemy : CellObject
         {
             //we are adjacent to the player, attack!
             GameManager.Instance.PlaySound(GameManager.Instance.EnemyAttackClip);
-            GameManager.Instance.ChangeFood(-3);
+            GameManager.Instance.ChangeFood(-m_AttackDamage);
         }
         else
         {

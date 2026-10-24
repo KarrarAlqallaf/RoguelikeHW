@@ -1,14 +1,16 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.Tilemaps;
 
 public class ExitCellObject : CellObject
 {
-    public Tile EndTile;
+    [SerializeField, FormerlySerializedAs("EndTile")]
+    private Tile m_EndTile;
 
     public override void Init(Vector2Int coord)
     {
         base.Init(coord);
-        GameManager.Instance.BoardManager.SetCellTile(coord, EndTile);
+        GameManager.Instance.BoardManager.SetCellTile(coord, m_EndTile);
     }
 
     public override void PlayerEntered()

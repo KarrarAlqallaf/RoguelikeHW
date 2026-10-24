@@ -1,15 +1,19 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
-    public float MoveSpeed = 5.0f;
+    [SerializeField, FormerlySerializedAs("MoveSpeed"), Range(1f, 20f)]
+    [Tooltip("Movement speed in world units per second when moving between cells")]
+    private float m_MoveSpeed = 5.0f;
 
     private BoardManager m_Board;
     private Vector2Int m_CellPosition;
     private bool m_IsGameOver;
     private bool m_IsMoving;
-    private Vector3 m_MoveTarget;
+    private Coroutine m_MoveCoroutine;
 
     private Animator m_Animator;
 
@@ -35,24 +39,65 @@ public class PlayerController : MonoBehaviour
     {
         m_CellPosition = cell;
 
+        //cancel any movement in progress (e.g. respawning on a new level)
+        if (m_MoveCoroutine != null)
+        {
+            StopCoroutine(m_MoveCoroutine);
+            m_MoveCoroutine = null;
+        }
+
         if (immediate)
         {
             m_IsMoving = false;
             transform.position = m_Board.CellToWorld(m_CellPosition);
+            m_Animator.SetBool("Moving", false);
         }
         else
         {
-            m_IsMoving = true;
             GameManager.Instance.PlaySound(GameManager.Instance.MoveClip);
-            m_MoveTarget = m_Board.CellToWorld(m_CellPosition);
+            m_MoveCoroutine = StartCoroutine(MoveRoutine(m_Board.CellToWorld(m_CellPosition)));
+        }
+    }
+
+    IEnumerator MoveRoutine(Vector3 target)
+    {
+        //input is ignored in Update while this is true, so no cell can be skipped
+        m_IsMoving = true;
+        m_Animator.SetBool("Moving", true);
+
+        Vector3 start = transform.position;
+        float duration = Vector3.Distance(start, target) / m_MoveSpeed;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            transform.position = Vector3.Lerp(start, target, elapsed / duration);
+            yield return null;
         }
 
-        m_Animator.SetBool("Moving", m_IsMoving);
+        transform.position = target;
+        m_IsMoving = false;
+        m_MoveCoroutine = null;
+        m_Animator.SetBool("Moving", false);
+
+        var cellData = m_Board.GetCellData(m_CellPosition);
+        if (cellData.ContainedObject != null)
+            cellData.ContainedObject.PlayerEntered();
     }
 
     public void GameOver()
     {
         m_IsGameOver = true;
+
+        //freeze the player where it is, it gets respawned on restart
+        if (m_MoveCoroutine != null)
+        {
+            StopCoroutine(m_MoveCoroutine);
+            m_MoveCoroutine = null;
+        }
+        m_IsMoving = false;
+        m_Animator.SetBool("Moving", false);
     }
 
     private void Update()
@@ -67,21 +112,9 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        //block input until the movement coroutine has reached the cell
         if (m_IsMoving)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, m_MoveTarget, MoveSpeed * Time.deltaTime);
-
-            if (transform.position == m_MoveTarget)
-            {
-                m_IsMoving = false;
-                m_Animator.SetBool("Moving", false);
-                var cellData = m_Board.GetCellData(m_CellPosition);
-                if(cellData.ContainedObject != null)
-                    cellData.ContainedObject.PlayerEntered();
-            }
-
             return;
-        }
 
         Vector2Int newCellTarget = m_CellPosition;
         bool hasMoved = false;
@@ -122,7 +155,7 @@ public class PlayerController : MonoBehaviour
                 }
                 else if (cellData.ContainedObject.PlayerWantsToEnter())
                 {
-                    //PlayerEntered is called once the player reaches the cell (see m_IsMoving above)
+                    //PlayerEntered is called once the player reaches the cell (see MoveRoutine)
                     MoveTo(newCellTarget, false);
                 }
                 else
