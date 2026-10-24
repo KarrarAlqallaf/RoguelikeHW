@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
 
     private Animator m_Animator;
 
+    public Vector2Int Cell => m_CellPosition;
+
     private void Awake()
     {
         m_Animator = GetComponent<Animator>();

@@ -711,6 +711,7 @@ MonoBehaviour:
   FoodPrefab: {fileID: 4388927141259828408, guid: 8c756f441ef050c4b856b8770ffc9ecd, type: 3}
   WallPrefab: {fileID: 458241638}
   ExitCellPrefab: {fileID: 25662594}
+  EnemyPrefab: {fileID: 8404563599724061398, guid: 3367ea38ac8968b4abe56f898e9d6caa, type: 3}
 --- !u!1001 &1318486709047963433
 PrefabInstance:
   m_ObjectHideFlags: 0
